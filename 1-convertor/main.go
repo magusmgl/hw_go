@@ -6,8 +6,8 @@ import (
 
 func main() {
 	fmt.Println("___ Конвертор валюты ___")
-	originalCurrency, targetCurrency, amountCurrency := getUserInput()
-	res := convertCurrency(originalCurrency, targetCurrency, amountCurrency)
+	originalCurrency, amountCurrency, targetCurrency := getUserInput()
+	res := convertCurrency(originalCurrency, amountCurrency, targetCurrency)
 	fmt.Printf("\n%0.f", res)
 }
 
