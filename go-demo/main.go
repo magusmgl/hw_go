@@ -14,7 +14,8 @@ func main() {
 		if r != nil {
 			fmt.Println("Reocver ", r)
 		}
-	}
+	}()
+
 	fmt.Println("___ Калькулятор индекса массы тела ___")
 	for {
 		userKg, userHeight := getUserInput()
