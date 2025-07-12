@@ -23,7 +23,7 @@ func getFloatSlice() []float64 {
 	for _, value := range strings.Split(inputString, ",") {
 		num, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			fmt.Printf("Ошибка парсинга %s: %v", value, err)
+			fmt.Printf("Ошибка парсинга %s: %v\n", value, err)
 			continue
 		}
 
