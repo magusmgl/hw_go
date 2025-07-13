@@ -4,17 +4,33 @@ import (
 	"fmt"
 )
 
+type convertorMap = map[string]float64
+type currMap = map[string]convertorMap
+
 func main() {
+	const usdToRub float64 = 78.38
+	const usdToEur float64 = 0.87
+	eurToRub := usdToRub / usdToEur
+
+	usdMap := convertorMap{"EUR": usdToEur, "RUB": usdToRub}
+	eurMap := convertorMap{"USD": 1 / usdToEur, "RUB": eurToRub}
+	rubMap := convertorMap{"USD": 1 / usdToRub, "EUR": 1 / eurToRub}
+
+	currencyMap := currMap{
+		"USD": usdMap,
+		"EUR": eurMap,
+		"RUB": rubMap}
+
 	fmt.Println("___ Конвертор валюты ___")
-	originalCurrency, amountCurrency, targetCurrency := getUserInput()
-	res := convertCurrency(originalCurrency, amountCurrency, targetCurrency)
+	originalCurrency, amountCurrency, targetCurrency := getUserInput(currencyMap)
+	res := convertCurrency(originalCurrency, amountCurrency, targetCurrency, currencyMap)
 	fmt.Printf("\n%0.f", res)
 }
 
-func getUserInput() (string, float64, string) {
+func getUserInput(currencyMap currMap) (string, float64, string) {
 	originalCurrency := getOriginalCurrency()
 	amountCurrency := getSumToConvert()
-	targetCurrency := getTargetCurrency(originalCurrency)
+	targetCurrency := getTargetCurrency(originalCurrency, currencyMap)
 
 	return originalCurrency, amountCurrency, targetCurrency
 }
@@ -45,61 +61,27 @@ func getSumToConvert() float64 {
 	}
 }
 
-func getTargetCurrency(originalCurrency string) string {
+func getTargetCurrency(originalCurrency string, currencyMap currMap) string {
 	var targetCurrency string
-	switch originalCurrency {
-	case "RUB":
-		for {
-			fmt.Print("Введите целевую валюту (USD, EUR): ")
-			fmt.Scan(&targetCurrency)
-			if targetCurrency != "USD" && targetCurrency != "EUR" {
-				fmt.Println("Введено неправильный тип валюты")
-				continue
+Menu:
+	for origCurr, valueMap := range currencyMap {
+		if origCurr == originalCurrency {
+			for {
+				fmt.Print("Введите целевую валюту: ")
+				fmt.Scan(&targetCurrency)
+
+				for key := range valueMap {
+					if key == targetCurrency {
+						break Menu
+					}
+				}
 			}
-			break
-		}
-	case "USD":
-		for {
-			fmt.Print("Введите целевую валюту (RUB, EUR): ")
-			fmt.Scan(&targetCurrency)
-			if targetCurrency != "RUB" && targetCurrency != "EUR" {
-				fmt.Println("Введено неправильный тип валюты")
-				continue
-			}
-			break
-		}
-	default:
-		for {
-			fmt.Print("Введите целевую валюту (RUB, USD): ")
-			fmt.Scan(&targetCurrency)
-			if targetCurrency != "RUB" && targetCurrency != "USD" {
-				fmt.Println("Введено неправильный тип валюты")
-				continue
-			}
-			break
 		}
 	}
 	return targetCurrency
 }
 
-func convertCurrency(originalCurrency string, amountCurrency float64, targetCurrency string) float64 {
-	const usdToEur float64 = 0.87
-	const usdToRub float64 = 78.38
-	eurToRub := usdToRub / usdToEur
-	var res float64
-	switch {
-	case originalCurrency == "RUB" && targetCurrency == "EUR":
-		res = amountCurrency / eurToRub
-	case originalCurrency == "RUB" && targetCurrency == "USD":
-		res = amountCurrency / usdToRub
-	case originalCurrency == "USD" && targetCurrency == "RUB":
-		res = amountCurrency * usdToRub
-	case originalCurrency == "EUR" && targetCurrency == "RUB":
-		res = amountCurrency * eurToRub
-	case originalCurrency == "USD" && targetCurrency == "EUR":
-		res = amountCurrency / usdToEur
-	case originalCurrency == "EUR" && targetCurrency == "USD":
-		res = amountCurrency * usdToEur
-	}
+func convertCurrency(originalCurrency string, amountCurrency float64, targetCurrency string, currencyMap currMap) float64 {
+	res := currencyMap[originalCurrency][targetCurrency] * amountCurrency
 	return res
 }
