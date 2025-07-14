@@ -32,9 +32,9 @@ Menu:
 		case 1:
 			printBookmarks(bookmarks)
 		case 2:
-			bookmarks = addBookmark(bookmarks)
+			addBookmark(bookmarks)
 		case 3:
-			bookmarks = deleteBookmark(bookmarks)
+			deleteBookmark(bookmarks)
 		case 4:
 			break Menu
 		}
@@ -61,22 +61,19 @@ func printBookmarks(bookmarks bookmarkMap) {
 	}
 }
 
-func addBookmark(bookmarks bookmarkMap) bookmarkMap {
+func addBookmark(bookmarks bookmarkMap) {
 	var newKey string
 	var newValue string
-	fmt.Println("Введите ключ:")
+	fmt.Print("Введите ключ: ")
 	fmt.Scan(&newKey)
-	fmt.Println("Введите значение:")
+	fmt.Print("Введите значение: ")
 	fmt.Scan(&newValue)
 	bookmarks[newKey] = newValue
-	return bookmarks
-
 }
 
-func deleteBookmark(bookmarks bookmarkMap) bookmarkMap {
+func deleteBookmark(bookmarks bookmarkMap) {
 	var keyToDelete string
-	fmt.Println("Введите ключ:")
+	fmt.Print("Введите ключ: ")
 	fmt.Scan(&keyToDelete)
 	delete(bookmarks, keyToDelete)
-	return bookmarks
 }
