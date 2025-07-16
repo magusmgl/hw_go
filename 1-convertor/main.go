@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type convertorMap = map[string]float64
@@ -22,25 +23,19 @@ func main() {
 		"RUB": rubMap}
 
 	fmt.Println("___ Конвертор валюты ___")
-	originalCurrency, amountCurrency, targetCurrency := getUserInput(currencyMap)
-	res := convertCurrency(originalCurrency, amountCurrency, targetCurrency, currencyMap)
+	originalCurrency := getOriginalCurrency(&currencyMap)
+	amountCurrency := getSumToConvert()
+	targetCurrency := getTargetCurrency(originalCurrency, &currencyMap)
+	res := convertCurrency(originalCurrency, amountCurrency, targetCurrency, &currencyMap)
 	fmt.Printf("\n%0.f", res)
 }
 
-func getUserInput(currencyMap currMap) (string, float64, string) {
-	originalCurrency := getOriginalCurrency()
-	amountCurrency := getSumToConvert()
-	targetCurrency := getTargetCurrency(originalCurrency, currencyMap)
-
-	return originalCurrency, amountCurrency, targetCurrency
-}
-
-func getOriginalCurrency() string {
+func getOriginalCurrency(currencyMap *currMap) string {
 	var originalCurrency string
 	for {
 		fmt.Print("Введите исходную валюту (RUB, USD, EUR): ")
 		fmt.Scan(&originalCurrency)
-		if originalCurrency != "RUB" && originalCurrency != "USD" && originalCurrency != "EUR" {
+		if _, ok := (*currencyMap)[originalCurrency]; !ok {
 			fmt.Println("Не поддерживаемый тип валюты")
 			continue
 		}
@@ -61,27 +56,25 @@ func getSumToConvert() float64 {
 	}
 }
 
-func getTargetCurrency(originalCurrency string, currencyMap currMap) string {
+func getTargetCurrency(originalCurrency string, currencyMap *currMap) string {
 	var targetCurrency string
-Menu:
-	for origCurr, valueMap := range currencyMap {
-		if origCurr == originalCurrency {
-			for {
-				fmt.Print("Введите целевую валюту: ")
-				fmt.Scan(&targetCurrency)
-
-				for key := range valueMap {
-					if key == targetCurrency {
-						break Menu
-					}
-				}
-			}
-		}
+	validTargetMap := (*currencyMap)[originalCurrency]
+	availableCurrency := make([]string, 0, len(validTargetMap))
+	for curr := range validTargetMap {
+		availableCurrency = append(availableCurrency, curr)
 	}
-	return targetCurrency
+
+	for {
+		fmt.Printf("Введите целевую валюту (%s): ", strings.Join(availableCurrency, ", "))
+		fmt.Scan(&targetCurrency)
+		if _, ok := validTargetMap[targetCurrency]; ok {
+			return targetCurrency
+		}
+		fmt.Println("Не поддерживаемая валюта")
+	}
 }
 
-func convertCurrency(originalCurrency string, amountCurrency float64, targetCurrency string, currencyMap currMap) float64 {
-	res := currencyMap[originalCurrency][targetCurrency] * amountCurrency
+func convertCurrency(originalCurrency string, amountCurrency float64, targetCurrency string, currencyMap *currMap) float64 {
+	res := (*currencyMap)[originalCurrency][targetCurrency] * amountCurrency
 	return res
 }
