@@ -7,10 +7,10 @@ import (
 )
 
 type Bin struct {
-	id      string
-	private bool
-	created time.Time
-	name    string
+	Id        string
+	Private   bool
+	CreatedAt time.Time
+	Name      string
 }
 
 func newBin(id string, private bool, name string) (*Bin, error) {
@@ -22,10 +22,10 @@ func newBin(id string, private bool, name string) (*Bin, error) {
 	}
 
 	newBin := &Bin{
-		id:      id,
-		private: private,
-		created: time.Now(),
-		name:    name,
+		Id:        id,
+		Private:   private,
+		CreatedAt: time.Now(),
+		Name:      name,
 	}
 
 	return newBin, nil
