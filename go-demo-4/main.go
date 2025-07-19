@@ -1,8 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand/v2"
+	"net/url"
+	"strings"
+	"time"
 )
 
 type account struct {
@@ -11,8 +15,14 @@ type account struct {
 	url      string
 }
 
-func (acc *account) outputPassword() {
-	fmt.Println(acc.login, acc.password, acc.url)
+type accountWithTimestamp struct {
+	createTime time.Time
+	updateTine time.Time
+	account
+}
+
+func (acc *accountWithTimestamp) outputPassword() {
+	fmt.Println(acc.login, acc.password, acc.url, acc.createTime, acc.updateTine)
 }
 
 func (acc *account) generatePassword(n int) {
@@ -23,13 +33,53 @@ func (acc *account) generatePassword(n int) {
 	acc.password = string(res)
 }
 
-func newAccount(login string, password string, url string) *account {
-	return &account{
-		login:    login,
-		password: password,
-		url:      url,
+func newAccountWithTimestamp(login string, password string, urlString string) (*accountWithTimestamp, error) {
+	if strings.TrimSpace(login) == "" {
+		return nil, errors.New("EMPTY_LOGIN")
 	}
+
+	_, err := url.ParseRequestURI(urlString)
+	if err != nil {
+		return nil, errors.New("INVALID_URL")
+	}
+
+	newAcc := &accountWithTimestamp{
+		createTime: time.Now(),
+		updateTine: time.Now(),
+		account: account{
+			login:    login,
+			password: password,
+			url:      urlString,
+		},
+	}
+	if strings.TrimSpace(password) == "" {
+		newAcc.generatePassword(12)
+	}
+	return newAcc, nil
+
 }
+
+// func newAccount(login string, password string, urlString string) (*account, error) {
+// 	if strings.TrimSpace(login) == "" {
+// 		return nil, errors.New("EMPTY_LOGIN")
+// 	}
+
+// 	_, err := url.ParseRequestURI(urlString)
+// 	if err != nil {
+// 		return nil, errors.New("INVALID_URL")
+// 	}
+
+// 	newAcc := &account{
+// 		login:    login,
+// 		password: password,
+// 		url:      urlString,
+// 	}
+
+// 	if strings.TrimSpace(password) == "" {
+// 		newAcc.generatePassword(12)
+// 	}
+// 	return newAcc, nil
+// }
 
 var letterRunes = []rune("abcdefghijklmnoprstuwvyzABCDEFJHOQPRSTYUXYWZ1234567890-*!")
 
@@ -51,8 +101,12 @@ func main() {
 	password := promptData("Введите пароль")
 	url := promptData("Введите URL")
 
-	myAccount := newAccount(login, password, url)
-	myAccount.generatePassword(12)
+	myAccount, error := newAccountWithTimestamp(login, password, url)
+	if error != nil {
+		fmt.Println("Неверный формта url или логин")
+		return
+	}
+	// myAccount.generatePassword(12)
 	myAccount.outputPassword()
 
 }
@@ -60,7 +114,7 @@ func main() {
 func promptData(prompt string) string {
 	fmt.Print(prompt + ": ")
 	var res string
-	fmt.Scan(&res)
+	fmt.Scanln(&res)
 	return res
 }
 
