@@ -4,12 +4,10 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-
-	"github.com/fatih/color"
 )
 
-func ReadFile(fileName string) ([]byte, error) {
-	if !IsJsonFile(fileName) {
+func ReadJsonFile(fileName string) ([]byte, error) {
+	if !isJsonFile(fileName) {
 		return nil, errors.New("NOT_JSON_FILE")
 	}
 	data, err := os.ReadFile(fileName)
@@ -19,25 +17,23 @@ func ReadFile(fileName string) ([]byte, error) {
 	return data, nil
 }
 
-func WriteFile(contet []byte, fileName string) {
-	if !IsJsonFile(fileName) {
-		color.Red("Указанный файл не является JSON файлом")
-		return
+func WriteToJsonFile(contet []byte, fileName string) error {
+	if !isJsonFile(fileName) {
+		return errors.New("NOT_JSON_FILE")
 	}
+
 	file, err := os.Create(fileName)
 	if err != nil {
-		color.Red("Не удалось создать файл")
-		return
+		return errors.New("FAILED_TO_CREATE_FILE")
 	}
 	defer file.Close()
 	_, err = file.Write(contet)
 	if err != nil {
-		color.Red("Не удалось записать данные в файл")
-		return
+		return errors.New("FALIED_TO_WRITE_DATA")
 	}
-	color.Green("Данные записаны в файл")
+	return nil
 }
 
-func IsJsonFile(filename string) bool {
+func isJsonFile(filename string) bool {
 	return filepath.Ext(filename) == ".json"
 }

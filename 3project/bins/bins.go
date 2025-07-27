@@ -1,13 +1,9 @@
 package bins
 
 import (
-	"3/cli/file"
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
-
-	"github.com/fatih/color"
 )
 
 type Bin struct {
@@ -43,29 +39,4 @@ func NewBinList() *BinList {
 	return &BinList{
 		Bins: make([]*Bin, 0),
 	}
-}
-
-func (binList *BinList) SaveToBinsFile(fileName string) {
-	content, err := json.Marshal(binList)
-	if err != nil {
-		color.Red("Не удалось преобразовать данные в json")
-		return
-	}
-	file.WriteFile(content, fileName)
-}
-
-func (binList *BinList) ReadBinsFromFile(fileName string) error {
-	data, err := file.ReadFile(fileName)
-	if err != nil {
-		return err
-	}
-	if len(data) == 0 {
-		return nil
-	}
-
-	err = json.Unmarshal(data, binList)
-	if err != nil {
-		return err
-	}
-	return nil
 }
