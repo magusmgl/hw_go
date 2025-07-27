@@ -14,12 +14,20 @@ type Vault struct {
 	UpdateAt time.Time `json:"updateAt"`
 }
 
-func NewVault() *Vault {
-	file, err := files.ReadFile("data.json")
+type VaultWithDb struct {
+	Vault
+	db files.JsonDb
+}
+
+func NewVault(db *files.JsonDb) *VaultWithDb {
+	file, err := db.Read()
 	if err != nil {
-		return &Vault{
-			Accounts: []Account{},
-			UpdateAt: time.Now(),
+		return &VaultWithDb{
+			Vault: Vault{
+				Accounts: []Account{},
+				UpdateAt: time.Now(),
+			},
+			db: *db,
 		}
 	}
 
@@ -27,12 +35,18 @@ func NewVault() *Vault {
 	err = json.Unmarshal(file, &vault)
 	if err != nil {
 		color.Red("Не удалось разобрать файл data.json")
-		return &Vault{
-			Accounts: []Account{},
-			UpdateAt: time.Now(),
+		return &VaultWithDb{
+			Vault: Vault{
+				Accounts: []Account{},
+				UpdateAt: time.Now(),
+			},
+			db: *db,
 		}
 	}
-	return &vault
+	return &VaultWithDb{
+		Vault: vault,
+		db:    *db,
+	}
 }
 
 func (vault *Vault) ToBytes() ([]byte, error) {
@@ -43,12 +57,12 @@ func (vault *Vault) ToBytes() ([]byte, error) {
 	return file, nil
 }
 
-func (vault *Vault) AddAccount(acc Account) {
+func (vault *VaultWithDb) AddAccount(acc Account) {
 	vault.Accounts = append(vault.Accounts, acc)
 	vault.save()
 }
 
-func (vault *Vault) FindAccountsByUrl(url string) []Account {
+func (vault *VaultWithDb) FindAccountsByUrl(url string) []Account {
 	var foundAccounts []Account
 	for _, account := range vault.Accounts {
 		isMatched := strings.Contains(account.Url, url)
@@ -59,7 +73,7 @@ func (vault *Vault) FindAccountsByUrl(url string) []Account {
 	return foundAccounts
 }
 
-func (vault *Vault) DeleteAccounts(url string) bool {
+func (vault *VaultWithDb) DeleteAccounts(url string) bool {
 	var newAcc []Account
 	isDeleted := false
 	for _, acc := range vault.Accounts {
@@ -75,11 +89,11 @@ func (vault *Vault) DeleteAccounts(url string) bool {
 	return isDeleted
 }
 
-func (vault *Vault) save() {
+func (vault *VaultWithDb) save() {
 	vault.UpdateAt = time.Now()
-	data, err := vault.ToBytes()
+	data, err := vault.Vault.ToBytes()
 	if err != nil {
 		color.Red("Не удалось преобразовать")
 	}
-	files.WriteFile(data, "data.json")
+	vault.db.Write(data)
 }
