@@ -17,23 +17,13 @@ type Account struct {
 	Password   string    `json:"password"`
 	Url        string    `json:"url"`
 	CreateTime time.Time `json:"createTime"`
-<<<<<<< Updated upstream
-	UpdateTine time.Time `json:"updateTime"`
+	UpdateTime time.Time `json:"updateTime"`
 }
 
 func (acc *Account) OutputAccount() {
 	color.Cyan(acc.Login)
 	color.Cyan(acc.Password)
 	color.Cyan(acc.Url)
-=======
-	UpdateTime time.Time `json:"updateTime"`
-}
-
-func (acc *Account) OutputAccount() {
-	color.Cyan("  Login: %s", acc.Login)
-	color.Cyan("  Password: %s", acc.Password)
-	color.Cyan("  URL: %s", acc.Url)
->>>>>>> Stashed changes
 }
 
 func (acc *Account) generatePassword(n int) {
@@ -56,11 +46,7 @@ func NewAccount(login string, password string, urlString string) (*Account, erro
 
 	newAcc := &Account{
 		CreateTime: time.Now(),
-<<<<<<< Updated upstream
-		UpdateTine: time.Now(),
-=======
 		UpdateTime: time.Now(),
->>>>>>> Stashed changes
 		Login:      login,
 		Password:   password,
 		Url:        urlString,
