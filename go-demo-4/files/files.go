@@ -1,8 +1,10 @@
 package files
 
 import (
-	"fmt"
+	"demo/password/output"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 type JsonDb struct {
@@ -18,7 +20,7 @@ func NewJsonDb(name string) *JsonDb {
 func (db *JsonDb) Read() ([]byte, error) {
 	data, err := os.ReadFile(db.filename)
 	if err != nil {
-		fmt.Println(err)
+		output.PrintError(err)
 		return nil, err
 	}
 	return data, nil
@@ -27,15 +29,15 @@ func (db *JsonDb) Read() ([]byte, error) {
 func (db *JsonDb) Write(content []byte) {
 	file, err := os.Create(db.filename)
 	if err != nil {
-		fmt.Println(err)
+		output.PrintError(err)
 		return
 	}
 	defer file.Close()
 	_, err1 := file.Write(content)
 	if err1 != nil {
 
-		fmt.Println(err)
+		output.PrintError(err)
 		return
 	}
-	fmt.Println("Запись успешна")
+	color.Green("Запись успешна")
 }
