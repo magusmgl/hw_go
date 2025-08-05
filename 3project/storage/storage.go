@@ -2,35 +2,55 @@ package storage
 
 import (
 	"3/cli/bins"
-	"3/cli/file"
 	"encoding/json"
+	"errors"
+	"os"
 )
 
-func SaveBinsToFile(fileName string, binList *bins.BinList) error {
+type Storagedb struct {
+	filename string
+}
+
+func NewStorageDb(filename string) *Storagedb {
+	return &Storagedb{
+		filename: filename,
+	}
+}
+
+func (storageDb *Storagedb) Write(binList *bins.BinList) error {
 	content, err := json.Marshal(binList)
 	if err != nil {
 		return err
 	}
 
-	err = file.WriteToJsonFile(content, fileName)
+	file, err := os.Create(storageDb.filename)
+
 	if err != nil {
-		return err
+		return errors.New("FAILED_TO_CREATE_FILE")
 	}
+
+	defer file.Close()
+	_, err = file.Write(content)
+	if err != nil {
+		return errors.New("FALIED_TO_WRITE_DATA")
+	}
+
 	return nil
 }
 
-func ReadBinsFromFile(fileName string, binList *bins.BinList) error {
-	data, err := file.ReadJsonFile(fileName)
+func (storageDb *Storagedb) ReadBinsFromFile() (error, *bins.BinList) {
+	data, err := os.ReadFile(storageDb.filename)
 	if err != nil {
-		return err
+		return errors.New("FAILED_TO_OPEN_FILE"), nil
 	}
 	if len(data) == 0 {
-		return nil
+		return errors.New("NO_DATA_TO_READ"), nil
 	}
 
+	binList := bins.NewBinList()
 	err = json.Unmarshal(data, binList)
 	if err != nil {
-		return err
+		return errors.New("FAILED_CONVERT_DATA_TO_BIN"), nil
 	}
-	return nil
+	return nil, binList
 }
