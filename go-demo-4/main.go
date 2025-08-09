@@ -1,60 +1,79 @@
 package main
 
 import (
+	"demo/password/account"
 	"fmt"
-	"math/rand/v2"
+
+	"github.com/fatih/color"
 )
 
-type account struct {
-	login    string
-	password string
-	url      string
-}
-
-func (acc *account) outputPassword() {
-	fmt.Println(acc.login, acc.password, acc.url)
-}
-
-func (acc *account) generatePassword(n int) {
-	res := make([]rune, n)
-	for i := range res {
-		res[i] = letterRunes[rand.IntN(int(len(letterRunes)))]
-	}
-	acc.password = string(res)
-}
-
-func newAccount(login string, password string, url string) *account {
-	return &account{
-		login:    login,
-		password: password,
-		url:      url,
-	}
-}
-
-var letterRunes = []rune("abcdefghijklmnoprstuwvyzABCDEFJHOQPRSTYUXYWZ1234567890-*!")
-
 func main() {
-	// a := 5
-	// fmt.Println(&a)
-	// double(&a)
-	// fmt.Println(a)
-
-	// b := [4]int{1, 2, 3, 4}
-	// reverse(&b)
-	// fmt.Println(b)
-	str := []rune("Привет)")
-	for _, ch := range string(str) {
-		fmt.Println(ch, string(ch))
+	vault := account.NewVault()
+	fmt.Println("Приложение для хранения паролей")
+Menu:
+	for {
+		variant := getMenu()
+		switch variant {
+		case 1:
+			createAccount(vault)
+		case 2:
+			findAccount(vault)
+		case 3:
+			deleteAccount(vault)
+		default:
+			break Menu
+		}
 	}
 
+}
+
+func getMenu() int {
+	var variant int
+	fmt.Println("Введите команду: ")
+	fmt.Println("1 - Создать аккаунт")
+	fmt.Println("2 - Найти аккаунт")
+	fmt.Println("3 - Удалить аккауунт")
+	fmt.Println("4 - Выход")
+	fmt.Scan(&variant)
+	return variant
+}
+
+func findAccount(vault *account.Vault) {
+	url := promptData("Введите url для поиска")
+	accounts := vault.FindAccountsByUrl(url)
+
+	if len(accounts) == 0 {
+		color.Red("Аккаунту с таким URL не найдены")
+	}
+
+	fmt.Println("Найденные аккаунты: ")
+	for _, accounts := range accounts {
+		accounts.OutputAccount()
+	}
+}
+
+func deleteAccount(vault *account.Vault) {
+	url := promptData("Введите url для поиска: ")
+	isDeleted := vault.DeleteAccounts(url)
+	if isDeleted {
+		color.Green("Удалено")
+	} else {
+		color.Red("Не найдено")
+	}
+
+}
+
+func createAccount(vault *account.Vault) {
 	login := promptData("Введите логин")
 	password := promptData("Введите пароль")
 	url := promptData("Введите URL")
 
-	myAccount := newAccount(login, password, url)
-	myAccount.generatePassword(12)
-	myAccount.outputPassword()
-
+	myAccount, err := account.NewAccount(login, password, url)
+	if err != nil {
+		fmt.Println("Неверный формта url или логин")
+		return
+	}
+	vault.AddAccount(*myAccount)
 }
 
 func promptData(prompt string) string {
@@ -62,14 +81,4 @@ func promptData(prompt string) string {
 	var res string
 	fmt.Scan(&res)
 	return res
-}
-
-func double(num *int) {
-	*num = *num * 2
-}
-
-func reverse(arr *[4]int) {
-	for index, value := range *arr {
-		(*arr)[len(arr)-1-index] = value
-	}
 }
