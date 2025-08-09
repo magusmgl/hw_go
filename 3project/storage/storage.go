@@ -17,13 +17,13 @@ func NewStorageDb(filename string) *Storagedb {
 	}
 }
 
-func (storageDb *Storagedb) Write(binList *bins.BinList) error {
+func (db *Storagedb) Write(binList *[]bins.Bin) error {
 	content, err := json.Marshal(binList)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(storageDb.filename)
+	file, err := os.Create(db.filename)
 
 	if err != nil {
 		return errors.New("FAILED_TO_CREATE_FILE")
@@ -38,19 +38,20 @@ func (storageDb *Storagedb) Write(binList *bins.BinList) error {
 	return nil
 }
 
-func (storageDb *Storagedb) ReadBinsFromFile() (error, *bins.BinList) {
-	data, err := os.ReadFile(storageDb.filename)
+func (db *Storagedb) Read() (*[]bins.Bin, error) {
+	data, err := os.ReadFile(db.filename)
 	if err != nil {
-		return errors.New("FAILED_TO_OPEN_FILE"), nil
+		return nil, errors.New("FAILED_TO_OPEN_FILE")
 	}
 	if len(data) == 0 {
-		return errors.New("NO_DATA_TO_READ"), nil
+		return nil, errors.New("NO_DATA_TO_READ")
 	}
 
-	binList := bins.NewBinList()
-	err = json.Unmarshal(data, binList)
+	var bins []bins.Bin
+	err = json.Unmarshal(data, &bins)
+
 	if err != nil {
-		return errors.New("FAILED_CONVERT_DATA_TO_BIN"), nil
+		return nil, errors.New("ERROR")
 	}
-	return nil, binList
+	return &bins, nil
 }

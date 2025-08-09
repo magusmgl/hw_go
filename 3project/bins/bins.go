@@ -7,8 +7,8 @@ import (
 )
 
 type Db interface {
-	Read() (error, []byte)
-	Write([]byte) error
+	Read() (*[]Bin, error)
+	Write(*[]Bin) error
 }
 
 type Bin struct {
@@ -19,7 +19,7 @@ type Bin struct {
 }
 
 type BinList struct {
-	Bins []*Bin `json:"bins"`
+	Bins []Bin `json:"bins"`
 	Db   Db
 }
 
@@ -43,7 +43,7 @@ func NewBin(id string, private bool, name string) (*Bin, error) {
 
 func NewBinList(db Db) *BinList {
 	return &BinList{
-		Bins: make([]*Bin, 0),
+		Bins: make([]Bin, 0),
 		Db:   db,
 	}
 }
