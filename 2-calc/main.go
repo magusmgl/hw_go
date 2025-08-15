@@ -7,11 +7,17 @@ import (
 	"strings"
 )
 
+var menuFunc = map[string]func([]float64) float64{
+	"AVG": countAvg,
+	"MED": countMed,
+	"SUM": countSum,
+}
+
 func main() {
-	operation := getOperation()
+	currentFunc := getFunction()
 	floatSlice := getFloatSlice()
-	result := getResult(operation, floatSlice)
-	fmt.Printf("Результат операции %v равен %0.2f", operation, result)
+	result := currentFunc(floatSlice)
+	fmt.Printf("Результат операции равен %0.2f", result)
 
 }
 
@@ -32,47 +38,86 @@ func getFloatSlice() []float64 {
 	return floatSlice
 }
 
-func getOperation() string {
+func getFunction() func([]float64) float64 {
 	var operationName string
 	for {
 		fmt.Println("Введите операцию: ")
 		fmt.Scan(&operationName)
-
-		if operationName != "AVG" &&
-			operationName != "SUM" &&
-			operationName != "MED" {
+		currentFunc := menuFunc[operationName]
+		if currentFunc == nil {
 			continue
 		}
-		break
+		return currentFunc
+		// if operationName != "AVG" &&
+		// 	operationName != "SUM" &&
+		// 	operationName != "MED" {
+		// 	continue
+		// }
+		// break
 	}
-	return operationName
 }
 
-func getResult(operation string, floatSlice []float64) float64 {
-	var result = 0.0
-	switch operation {
-	case "SUM":
-		for _, value := range floatSlice {
-			result += value
-		}
-	case "AVG":
-		var sum float64
-		for _, value := range floatSlice {
-			sum += value
-		}
-		sliceLength := len(floatSlice)
-		result = sum / float64(sliceLength)
+// func getResult(operation string, floatSlice []float64) float64 {
+// 	currentFunc := menuFunc[operation]
+// 	return currentFunc(floatSlice)
 
-	case "MED":
-		sort.Float64s(floatSlice)
-		sliceLength := len(floatSlice)
-		if sliceLength%2 == 0 {
-			index := sliceLength/2 - 1
-			result = (floatSlice[index] + floatSlice[index+1]) / 2
-		} else {
-			index := (sliceLength - 1) / 2
-			result = floatSlice[index]
-		}
+// var result = 0.0
+// switch operation {
+// case "SUM":
+// 	for _, value := range floatSlice {
+// 		result += value
+// 	}
+// case "AVG":
+// 	var sum float64
+// 	for _, value := range floatSlice {
+// 		sum += value
+// 	}
+// 	sliceLength := len(floatSlice)
+// 	result = sum / float64(sliceLength)
+
+// case "MED":
+// 	sort.Float64s(floatSlice)
+// 	sliceLength := len(floatSlice)
+// 	if sliceLength%2 == 0 {
+// 		index := sliceLength/2 - 1
+// 		result = (floatSlice[index] + floatSlice[index+1]) / 2
+// 	} else {
+// 		index := (sliceLength - 1) / 2
+// 		result = floatSlice[index]
+// 	}
+// }
+// return result
+// }
+
+func countSum(floatSlice []float64) float64 {
+	var result = 0.0
+	for _, value := range floatSlice {
+		result += value
 	}
+	return result
+}
+
+func countMed(floatSlice []float64) float64 {
+	var result = 0.0
+	sort.Float64s(floatSlice)
+	sliceLength := len(floatSlice)
+	if sliceLength%2 == 0 {
+		index := sliceLength/2 - 1
+		result = (floatSlice[index] + floatSlice[index+1]) / 2
+	} else {
+		index := (sliceLength - 1) / 2
+		result = floatSlice[index]
+	}
+	return result
+}
+
+func countAvg(floatSlice []float64) float64 {
+	var result = 0.0
+	var sum float64
+	for _, value := range floatSlice {
+		sum += value
+	}
+	sliceLength := len(floatSlice)
+	result = sum / float64(sliceLength)
 	return result
 }
