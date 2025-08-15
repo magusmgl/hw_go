@@ -15,6 +15,8 @@ type ToByteDb interface {
 	Write([]byte)
 }
 
+type MyFunc func(a string) bool
+
 type Db interface {
 	FromByteDb
 	ToByteDb
