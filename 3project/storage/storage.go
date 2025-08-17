@@ -2,28 +2,29 @@ package storage
 
 import (
 	"3/cli/bins"
+	"3/cli/file"
 	"encoding/json"
 	"errors"
 	"os"
 )
 
 type Storagedb struct {
-	filename string
+	FileName string
 }
 
 func NewStorageDb(filename string) *Storagedb {
 	return &Storagedb{
-		filename: filename,
+		FileName: filename,
 	}
 }
 
-func (db *Storagedb) Write(binList *[]bins.Bin) error {
+func (db *Storagedb) Write(binList []bins.Bin) error {
 	content, err := json.Marshal(binList)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(db.filename)
+	file, err := os.Create(db.FileName)
 
 	if err != nil {
 		return errors.New("FAILED_TO_CREATE_FILE")
@@ -38,8 +39,8 @@ func (db *Storagedb) Write(binList *[]bins.Bin) error {
 	return nil
 }
 
-func (db *Storagedb) Read() (*[]bins.Bin, error) {
-	data, err := os.ReadFile(db.filename)
+func (db *Storagedb) Read() ([]bins.Bin, error) {
+	data, err := file.ReadJsonFile(db.FileName)
 	if err != nil {
 		return nil, errors.New("FAILED_TO_OPEN_FILE")
 	}
@@ -53,5 +54,5 @@ func (db *Storagedb) Read() (*[]bins.Bin, error) {
 	if err != nil {
 		return nil, errors.New("ERROR")
 	}
-	return &bins, nil
+	return bins, nil
 }

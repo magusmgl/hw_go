@@ -7,8 +7,8 @@ import (
 )
 
 type Db interface {
-	Read() (*[]Bin, error)
-	Write(*[]Bin) error
+	Read() ([]Bin, error)
+	Write([]Bin) error
 }
 
 type Bin struct {
@@ -42,8 +42,15 @@ func NewBin(id string, private bool, name string) (*Bin, error) {
 }
 
 func NewBinList(db Db) *BinList {
+	data, err := db.Read()
+	if err != nil {
+		return &BinList{
+			Bins: []Bin{},
+			Db:   db,
+		}
+	}
 	return &BinList{
-		Bins: make([]Bin, 0),
+		Bins: data,
 		Db:   db,
 	}
 }
