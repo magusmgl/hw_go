@@ -22,6 +22,11 @@ type Db interface {
 	ToByteDb
 }
 
+type Encrypter interface {
+	Encrypt([]byte) []byte
+	Decrypt([]byte) []byte
+}
+
 type Vault struct {
 	Accounts []Account `json:"accounts"`
 	UpdateAt time.Time `json:"updateAt"`
@@ -29,10 +34,11 @@ type Vault struct {
 
 type VaultWithDb struct {
 	Vault
-	db Db
+	db  Db
+	enc Encrypter
 }
 
-func NewVault(db Db) *VaultWithDb {
+func NewVault(db Db, enc Encrypter) *VaultWithDb {
 	file, err := db.Read()
 	if err != nil {
 		return &VaultWithDb{
@@ -40,25 +46,28 @@ func NewVault(db Db) *VaultWithDb {
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: db,
+			db:  db,
+			enc: enc,
 		}
 	}
-
+	data := enc.Decrypt(file)
 	var vault Vault
-	err = json.Unmarshal(file, &vault)
+	err = json.Unmarshal(data, &vault)
 	if err != nil {
-		output.PrintError("Не удалось разобрать файл data.json")
+		output.PrintError("Не удалось разобрать файл data.vault")
 		return &VaultWithDb{
 			Vault: Vault{
 				Accounts: []Account{},
 				UpdateAt: time.Now(),
 			},
-			db: db,
+			db:  db,
+			enc: enc,
 		}
 	}
 	return &VaultWithDb{
 		Vault: vault,
 		db:    db,
+		enc:   enc,
 	}
 }
 
@@ -105,8 +114,9 @@ func (vault *VaultWithDb) DeleteAccounts(url string) bool {
 func (vault *VaultWithDb) save() {
 	vault.UpdateAt = time.Now()
 	data, err := vault.Vault.ToBytes()
+	encData := vault.enc.Encrypt(data)
 	if err != nil {
 		output.PrintError("Не удалось преобразовать")
 	}
-	vault.db.Write(data)
+	vault.db.Write(encData)
 }

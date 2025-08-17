@@ -23,6 +23,7 @@ func (db *JsonDb) Read() ([]byte, error) {
 		output.PrintError(err)
 		return nil, err
 	}
+
 	return data, nil
 }
 
