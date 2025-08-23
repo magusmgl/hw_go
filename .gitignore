@@ -3,3 +3,4 @@ go-demo/app-1.exe
 data.json
 /*.vault
 .env
+.vscode/launch.json
