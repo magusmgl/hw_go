@@ -4,3 +4,4 @@ go-demo-4/data.json
 .idea/workspace.xml
 data.json
 .env
+.vscode/*
