@@ -15,3 +15,5 @@ func NewAPI(config config.Config) *API {
 func StartApi() {}
 
 func StopApi() {}
+
+func Create(binList b)

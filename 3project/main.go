@@ -5,6 +5,7 @@ import (
 	"3/cli/bins"
 	"3/cli/config"
 	"3/cli/storage"
+	"flag"
 	"fmt"
 
 	"github.com/joho/godotenv"
@@ -15,6 +16,12 @@ func main() {
 	if err != nil {
 		fmt.Println("Не удалост найти env")
 	}
+
+	operation := flag.String("", "", "операция")
+	file := flag.String("file", "", "file name")
+	name := flag.String("name", "", "name")
+	id := flag.String("id", "", "id bin")
+	flag.Parse()
 
 	api.NewAPI(*config.NewConfig())
 
