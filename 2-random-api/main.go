@@ -19,7 +19,7 @@ func NewCustomHandler(router *http.ServeMux) {
 
 func (handler *CustomHandler) RandomNum(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL.Path)
-	num := rand.Intn(7)
+	num := rand.Intn(6) + 1
 	numStr := strconv.Itoa(num)
 	_, err := w.Write([]byte(numStr))
 	if err != nil {
