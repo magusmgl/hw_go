@@ -19,9 +19,12 @@ func NewCustomHandler(router *http.ServeMux) {
 
 func (handler *CustomHandler) RandomNum(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, r.URL.Path)
-	num := rand.Intn(100)
+	num := rand.Intn(7)
 	numStr := strconv.Itoa(num)
-	w.Write([]byte(numStr))
+	_, err := w.Write([]byte(numStr))
+	if err != nil {
+		http.Error(w, "Не удалось записать ответ", http.StatusInternalServerError)
+	}
 }
 
 func main() {
