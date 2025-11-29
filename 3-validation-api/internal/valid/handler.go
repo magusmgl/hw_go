@@ -1,6 +1,7 @@
 package valid
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,10 @@ import (
 
 	"github.com/jordan-wright/email"
 )
+
+type SendEmailRequest struct {
+	To string `json:"to"`
+}
 
 type EmailHandlerDeps struct {
 	Config *configs.Config
@@ -30,9 +35,20 @@ func NewEmailHandler(router *http.ServeMux, deps EmailHandlerDeps) {
 
 func (h *EmailHandler) Send() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var req SendEmailRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if req.To == "" {
+			http.Error(w, "Recipient email ('to') is required", http.StatusBadRequest)
+			return
+		}
+
 		e := &email.Email{
-			To:      []string{"magus.mgl@gmail.com"},
-			From:    fmt.Sprintf("My app <%s>", h.Config.Email),
+			To:      []string{req.To},
+			From:    fmt.Sprintf("My App <%s>", h.Config.Email),
 			Subject: "Awesome Subject",
 			Text:    []byte("Text Body is, of course, supported!"),
 			HTML:    []byte("<h1>Fancy HTML is supported, too!</h1>"),
@@ -46,7 +62,7 @@ func (h *EmailHandler) Send() http.HandlerFunc {
 			log.Printf("Starting to send email to %s in background...", e.To[0])
 			err := e.Send(smtpAddr, auth)
 			if err != nil {
-				log.Printf("Failed to send email in background: %v", err)
+				log.Printf("Failed to 	send email in background: %v", err)
 			} else {
 				log.Printf("Email successfully sent in background to %s", e.To[0])
 			}

@@ -1,19 +1,37 @@
 package configs
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 type Config struct {
-	Email    string
 	Password string
 	Address  string
 	Port     string
+	Email    string
 }
 
-func LoadConfig() *Config {
-	return &Config{
-		Email:    os.Getenv("EMAIL"),
+func LoadConfig() (*Config, error) {
+	cfg := &Config{
 		Password: os.Getenv("PASSWORD"),
 		Address:  os.Getenv("ADDRESS"),
 		Port:     os.Getenv("PORT"),
+		Email:    os.Getenv("EMAIL"),
 	}
+
+	if cfg.Password == "" {
+		return nil, fmt.Errorf("environment variable PASSWORD is not set")
+	}
+	if cfg.Address == "" {
+		return nil, fmt.Errorf("environment variable ADDRESS is not set")
+	}
+	if cfg.Port == "" {
+		return nil, fmt.Errorf("environment variable PORT is not set")
+	}
+	if cfg.Email == "" {
+		return nil, fmt.Errorf("environment variable EMAIL is not set")
+	}
+
+	return cfg, nil
 }
