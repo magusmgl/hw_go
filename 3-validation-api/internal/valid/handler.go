@@ -1,20 +1,17 @@
 package valid
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/smtp"
 	"net/textproto"
 	"validation/api/configs"
+	"validation/api/pkg/req"
+	"validation/api/pkg/res"
 
 	"github.com/jordan-wright/email"
 )
-
-type SendEmailRequest struct {
-	To string `json:"to"`
-}
 
 type EmailHandlerDeps struct {
 	Config *configs.Config
@@ -35,19 +32,14 @@ func NewEmailHandler(router *http.ServeMux, deps EmailHandlerDeps) {
 
 func (h *EmailHandler) Send() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req SendEmailRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "Invalid request body", http.StatusBadRequest)
-			return
-		}
 
-		if req.To == "" {
-			http.Error(w, "Recipient email ('to') is required", http.StatusBadRequest)
+		body, err := req.HandleBody[SendEmailRequest](&w, r)
+		if err != nil {
 			return
 		}
 
 		e := &email.Email{
-			To:      []string{req.To},
+			To:      []string{body.To},
 			From:    fmt.Sprintf("My App <%s>", h.Config.Email),
 			Subject: "Awesome Subject",
 			Text:    []byte("Text Body is, of course, supported!"),
@@ -68,8 +60,7 @@ func (h *EmailHandler) Send() http.HandlerFunc {
 			}
 		}()
 
-		w.WriteHeader(http.StatusAccepted)
-		fmt.Fprintln(w, "Email request accepted and is being processed.")
+		res.JSON(w, map[string]string{"info": "Email request accepted and is being processed."}, http.StatusAccepted)
 	}
 }
 

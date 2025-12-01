@@ -2,7 +2,10 @@ package configs
 
 import (
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -13,6 +16,11 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	cfg := &Config{
 		Password: os.Getenv("PASSWORD"),
 		Address:  os.Getenv("ADDRESS"),

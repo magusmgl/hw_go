@@ -6,16 +6,9 @@ import (
 	"net/http"
 	"validation/api/configs"
 	"validation/api/internal/valid"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	conf, err := configs.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
